@@ -10,7 +10,6 @@ app = FastAPI()
 
 @app.post("/upload-project")
 async def upload_project(file: UploadFile = File(...)):
-
     temp_filename = f"temp_{file.filename}"
     try:
         with open(temp_filename, "wb+") as buffer:
