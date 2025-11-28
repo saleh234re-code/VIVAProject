@@ -5,7 +5,7 @@ import os
 import json
 from dotenv import load_dotenv
 
-# تحميل المتغيرات وإعداد Gemini مرة واحدة هنا
+
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=api_key)
@@ -16,7 +16,7 @@ model = genai.GenerativeModel(
 )
 
 
-# --- دوال قراءة الملفات ---
+
 def read_pdf(file_path, max_pages=30):
     text = ""
     try:
@@ -53,7 +53,7 @@ def split_text(text, chunk_size=2000):
     return [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
 
 
-# --- دوال الذكاء الاصطناعي ---
+
 def generate_questions(text_chunk):
     prompt = """
     Act as a university professor. Analyze the provided text.
