@@ -109,5 +109,5 @@ If you want to run this project locally on your machine:
 ---
 
 ## 👤 Author
-**Mustafa Essam** Computer Science Student | Backend Developer  
+**Mustafa Essam** Computer Science Student | Software engineer 
 [GitHub Profile](https://github.com/mustafaEssam10)
