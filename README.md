@@ -1,21 +1,21 @@
-# 🎓 VIVA API - AI-Powered Project Discussion System
+# VIVA API - AI-Powered Project Discussion System
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688?logo=fastapi&logoColor=white)
 ![Gemini AI](https://img.shields.io/badge/AI-Google%20Gemini-orange?logo=google&logoColor=white)
 ![Deployed](https://img.shields.io/badge/Deployed%20on-Railway-0B0D0E?logo=railway&logoColor=white)
 
-## 📖 Project Description
+## Project Description
 This is the Backend API for the VIVA Graduation Project. It acts as an intelligent engine that simulates a university project discussion (Viva). The system allows students to upload their project documentation, generates relevant discussion questions using **Google's Gemini AI**, and evaluates student answers with grading and feedback.
 
-## 🚀 Key Features
+## Key Features
 * **Document Parsing:** Extracts text from project files (supports `.pdf` and `.docx`).
 * **AI Question Generation:** Uses NLP (Gemini Pro) to analyze project content and generate diverse questions (factual, analytical, explanatory).
 * **Automated Grading:** Compares student answers against model answers and provides a score (0-10) with constructive feedback.
 * **High Performance:** Built with **FastAPI** for asynchronous processing and high speed.
 * **Swagger Documentation:** Interactive API documentation for easy testing and integration.
 
-## 🛠️ Tech Stack
+## Tech Stack
 * **Framework:** FastAPI
 * **Language:** Python 3.10
 * **AI Model:** Google Generative AI (Gemini 2.5 Flash)
@@ -24,7 +24,7 @@ This is the Backend API for the VIVA Graduation Project. It acts as an intellige
 
 ---
 
-## 🔌 API Documentation & Usage
+## API Documentation & Usage
 
 **Base URL (Live Server):** `https://web-production-d763e.up.railway.app`
 
@@ -74,7 +74,7 @@ This is the Backend API for the VIVA Graduation Project. It acts as an intellige
 
 ---
 
-## 💻 Local Installation (For Developers)
+## Local Installation (For Developers)
 
 If you want to run this project locally on your machine:
 
