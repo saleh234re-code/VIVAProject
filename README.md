@@ -9,7 +9,7 @@
 This is the Backend API for the VIVA Graduation Project. It acts as an intelligent engine that simulates a university project discussion (Viva). The system allows students to upload their project documentation, generates relevant discussion questions using **Google's Gemini AI**, and evaluates student answers with grading and feedback.
 
 ## Key Features
-* **Document Parsing:** Extracts text from project files (supports `.pdf` and `.docx`).
+* **Document Parsing:** Extracts text from project files (supports .pdf and .docx).
 * **AI Question Generation:** Uses NLP (Gemini Pro) to analyze project content and generate diverse questions (factual, analytical, explanatory).
 * **Automated Grading:** Compares student answers against model answers and provides a score (0-10) with constructive feedback.
 * **High Performance:** Built with **FastAPI** for asynchronous processing and high speed.
@@ -30,32 +30,33 @@ This is the Backend API for the VIVA Graduation Project. It acts as an intellige
 
 **Interactive Docs (Swagger UI):** [Click here to view API Docs](https://web-production-d763e.up.railway.app/docs)
 
-### 1️⃣ Upload Project & Generate Questions
+### 1. Upload Project & Generate Questions
 * **Endpoint:** `POST /upload-project`
-* **Description:** Uploads the project file and returns a list of generated questions.
+* **Description:** Uploads the project file and returns a list of generated questions strings.
 * **Input:** `multipart/form-data` (Key: `file`)
 * **Response Example:**
     ```json
     {
       "status": "success",
-      "data": [
-        {
-          "question": "What is the main objective of the platform?",
-          "answer": "The main objective is to provide..."
-        }
+      "questions": [
+        "What is the main objective of the platform?",
+        "How does the AI model handle Arabic dialects?",
+        "Explain the architecture used in this project."
       ]
     }
     ```
 
-### 2️⃣ Evaluate Student Answers
+### 2. Evaluate Student Answers
 * **Endpoint:** `POST /evaluate`
-* **Description:** Grades the student's answers based on the AI model's knowledge.
+* **Description:** Grades the student's answers based on the previously uploaded project.
 * **Input (JSON):**
     ```json
     {
-      "qa_pairs": {
-        "Question Text": ["Model Answer", "Student Answer"]
-      }
+      "student_answers": [
+        "The objective is to help students simluate exams...",
+        "It uses NLP models to process text...",
+        "The architecture consists of a client-server model..."
+      ]
     }
     ```
 * **Response Example:**
@@ -64,9 +65,14 @@ This is the Backend API for the VIVA Graduation Project. It acts as an intellige
       "status": "success",
       "evaluation": [
         {
-          "question": "Question Text",
+          "question": "What is the main objective of the platform?",
           "score": 8,
-          "feedback": "Good answer, but missed one key point..."
+          "feedback": "Good answer, but you missed mentioning the real-time feedback feature."
+        },
+        {
+          "question": "How does the AI model handle Arabic dialects?",
+          "score": 9,
+          "feedback": "Excellent explanation of the NLP process."
         }
       ]
     }
@@ -108,6 +114,6 @@ If you want to run this project locally on your machine:
 
 ---
 
-## 👤 Author
-**Mustafa Essam** Computer Science Student | Software engineer 
+## Author
+**Mustafa Essam** Computer Science Student | Software Engineer  
 [GitHub Profile](https://github.com/mustafaEssam10)
