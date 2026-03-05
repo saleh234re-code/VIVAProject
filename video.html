@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="Annotation 2025-11-26 210646.png">
+<title>AI Meeting</title>
+<style>
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #001133;
+    color: white;
+   
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+
+.container {
+    display: grid;
+
+    grid-template-columns: 1fr; 
+    height: 100vh; 
+}
+
+
+.video-section {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background: #001133;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    position: relative;
+    border-right: none;
+    height: 100vh; 
+}
+
+.video-section.show { opacity: 1; }
+
+video {
+    max-width: 95%;
+    width: 95%;
+    height: 50%;
+    min-height: 200px; 
+    border-radius: 10px;
+    border: 4px solid #0a4ca3;
+    background: black;
+    box-shadow: 0 0 15px rgba(10,76,163,0.7);
+    margin-bottom: 5px;
+    object-fit: cover;
+}
+
+.camera-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 18px;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 8px;
+    pointer-events: none;
+    display: block; 
+}
+
+
+.video-header {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    padding-bottom: 10px;
+}
+.controls.show { opacity: 1; }
+
+.ctrl-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.ctrl-btn:hover { transform: scale(1.1); box-shadow: 0 0 10px #3f7fff; }
+.ctrl-btn img { width: 40px; height: 40px; background: transparent;}
+
+.ctrl-btn.striked::after {
+    content: '';
+    position: absolute;
+    width: 35px;
+    height: 3px;
+    background: rgb(0,0,0);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) rotate(-45deg);
+    border-radius: 2px;
+}
+
+
+
+.questions-section {
+    padding: 20px 15px; 
+    overflow-y: auto;
+    background: #001133;
+    height: 100vh; 
+    box-sizing: border-box;
+}
+
+.file-name {
+    white-space: normal; 
+    background: white;
+    color: #001133;
+    font-weight: bold;
+    padding: 8px 15px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 15px;
+    max-width: 95%;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.question-step {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.question-card {
+    background: #111;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+    border-left: 5px solid #0a4ca3;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.record-btn, .next-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.record-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background:#0a4ca3;
+    color: #fefefe;
+}
+
+.record-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 8px #0a4ca3;
+}
+
+.record-dot {
+    width: 12px;
+    height: 12px;
+    background: red;
+    border-radius: 50%;
+}
+
+.record-btn.recording {
+    background: darkred;
+    box-shadow: 0 0 10px red;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 6px red; }
+    50% { box-shadow: 0 0 12px red; }
+    100% { box-shadow: 0 0 6px red; }
+}
+
+.next-btn {
+    background: #0a4ca3;
+    color: rgb(255, 255, 255);
+}
+
+.next-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 8px #0a4ca3;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: space-around;
+    gap: 15px;
+    align-items: center;
+}
+
+
+
+@media (max-width: 767px) {
+    
+    .container {
+        grid-template-columns: 1fr; 
+       
+        height: auto; 
+    }
+
+    .video-section {
+        
+        height: auto; 
+        padding-bottom: 30px; 
+    }
+    
+    video {
+        width: 90%;
+        height: auto;
+    }
+
+    .questions-section {
+        
+        height: auto; 
+        overflow-y: visible;
+        padding-top: 5px; 
+        padding-bottom: 50px; 
+    }
+
+    .question-step {
+       
+        position: static; 
+        text-align: center;
+        margin-bottom: 15px;
+        margin-top: 15px;
+    }
+
+    .button-group {
+        justify-content: space-between;
+    }
+}
+
+
+
+@media (min-width: 768px) {
+    .container {
+        
+        grid-template-columns: 1fr 1fr; 
+        height: 100vh;
+    }
+    
+    .video-section {
+         
+        border-right: 2px solid rgba(255,255,255,0.15);
+        height: 100vh;
+    }
+
+    .questions-section {
+        height: 100vh;
+        overflow-y: auto; 
+        padding: 20px 30px; 
+    }
+
+    .question-step {
+        
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        margin: 0;
+        width: auto;
+        font-size: 14px;
+    }
+
+    .button-group {
+        flex-wrap: nowrap; 
+        gap: 30px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="video-section" id="videoSection">
+        <div class="video-header">
+            <div class="timer" id="timer">00:00:00</div>
+        </div>
+        <video id="meetingVideo" autoplay></video>
+        <div class="camera-overlay" id="cameraOverlay">Camera Off</div>
+        <div class="controls" id="controls">
+            <button class="ctrl-btn" id="muteBtn">
+                <img src="Annotation_2025-11-28_220543-removebg-preview.png" alt="Mic">
+            </button>
+            <button class="ctrl-btn striked" id="cameraBtn">
+                <img src="Annotation_2025-11-28_213516-removebg-preview (1).png" alt="Camera">
+            </button>
+            <button class="ctrl-btn striked" id="recordBtn">
+                <img src="Annotation_2025-11-28_213244-removebg-preview.png" alt="Record">
+            </button>
+            <button class="ctrl-btn" id="endBtn">
+                <img src="Annotation_2025-11-28_120500-removebg-preview.png" alt="End">
+            </button>
+        </div>
+    </div>
+    <div class="questions-section" id="questionsList">
+        <div class="file-name" id="fileNameDisplay">
+            Project: N/A | File: N/A
+        </div>
+        <div class="question-step" id="questionStep">Question 1 of 3</div>
+        <div id="questionContainer">
+            <div id="resultDisplay" style="text-align: center; margin-top: 20px;">
+                <p id="transcriptionText" style="font-style: italic; color: #ccc;"></p>
+                <h3 id="emotionText" style="font-weight: bold;"></h3>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+let stream;
+const cameraBtn = document.getElementById('cameraBtn');
+const cameraOverlay = document.getElementById('cameraOverlay');
+const muteBtn = document.getElementById('muteBtn');
+const recordBtn = document.getElementById('recordBtn');
+const endBtn = document.getElementById('endBtn');
+const meetingVideo = document.getElementById('meetingVideo');
+
+cameraOverlay.style.display = 'block'; 
+
+let seconds = 0;
+const timerElement = document.getElementById('timer');
+const timerInterval = setInterval(() => {
+    seconds++;
+    let h = String(Math.floor(seconds/3600)).padStart(2,'0');
+    let m = String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+    let s = String(seconds%60).padStart(2,'0');
+    timerElement.textContent = `${h}:${m}:${s}`;
+}, 1000);
+ 
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+.then(s => {
+    stream = s;
+    if (stream.getVideoTracks().length > 0) {
+        stream.getVideoTracks()[0].enabled = false;
+    }
+    meetingVideo.srcObject = stream;
+    if (stream.getAudioTracks().length > 0) {
+        muteBtn.classList.remove('striked'); 
+    }
+})
+.catch(err => {
+    console.error('Error accessing media:', err);
+    alert("Cannot access camera or microphone. Please check permissions.");
+});
+
+function toggleControl(button, track) {
+    if(track) track.enabled = !track.enabled;
+    button.classList.toggle('striked');
+}
+
+ 
+muteBtn.onclick = () => {
+    if (stream && stream.getAudioTracks().length > 0) {
+        toggleControl(muteBtn, stream.getAudioTracks()[0]);
+    } else {
+        alert("Audio track not available.");
+    }
+};
+
+cameraBtn.onclick = () => {
+    if (stream && stream.getVideoTracks().length > 0) {
+        const videoTrack = stream.getVideoTracks()[0];
+        toggleControl(cameraBtn, videoTrack);
+        cameraOverlay.style.display = videoTrack.enabled ? 'none' : 'block';
+    } else {
+        alert("Video track not available.");
+    }
+};
+
+let videoRecorder;
+let videoAudioChunks = [];
+let videoRecording = false;
+
+recordBtn.onclick = () => {
+    if (!stream) { alert("Camera/Audio not ready!"); return; }
+    
+    if (videoRecorder && videoRecorder.state === 'recording') {
+        videoRecorder.stop();
+        recordBtn.classList.add("striked");
+        videoRecording = false;
+    } else {
+        recordBtn.classList.remove("striked");
+        videoRecorder = new MediaRecorder(stream);
+        videoAudioChunks = [];
+        
+        videoRecorder.ondataavailable = e => videoAudioChunks.push(e.data);
+        
+        videoRecorder.onstop = () => {
+             const blob = new Blob(videoAudioChunks, { type: "video/webm" }); 
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "meeting_record.webm";
+            a.click();
+            videoAudioChunks = [];
+        };
+        
+        videoRecorder.start();
+        videoRecording = true;
+    }
+};
+
+endBtn.onclick = () => {
+    clearInterval(timerInterval); 
+    if(stream) stream.getTracks().forEach(t => t.stop());
+    
+    if (window.questionRecorder && window.questionRecorder.state === 'recording') {
+        window.questionRecorder.stop();
+    }
+
+    document.body.innerHTML = '<h1 style="text-align:center;margin-top:200px;">Meeting Ended</h1>';
+};
+
+const fileNameDiv = document.getElementById('fileNameDisplay');
+const projectName = localStorage.getItem('projectName') || "N/A";
+const fileName = localStorage.getItem('fileName') || "N/A";
+fileNameDiv.textContent = `Project Name: ${projectName} | File: ${fileName}`;
+ 
+const questions = [
+    {type:'text', q:'Explain your project goal:'},
+    {type:'text', q:'How does your AI read the uploaded file?'},
+    {type:'multiple', q:'Select your role:', options:['Front-end','Back-end','Full Stack']}
+];
+
+let currentIndex = 0;
+const container = document.getElementById("questionContainer");
+const questionStep = document.getElementById("questionStep");
+
+function updateStep() {
+    questionStep.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+}
+
+function loadQuestion() {
+    container.innerHTML = "";
+    const item = questions[currentIndex];
+
+    const card = document.createElement("div");
+    card.className = "question-card";
+
+    const q = document.createElement("p");
+    q.innerText = item.q;
+    card.appendChild(q);
+
+    
+    if (item.type === 'multiple') {
+        const select = document.createElement('select');
+        select.style.padding = '10px';
+        select.style.borderRadius = '8px';
+        select.style.border = '1px solid #ccc';
+        select.style.marginBottom = '10px';
+        select.style.width = '100%';
+        select.style.color = '#000';  
+
+        item.options.forEach(optionText => {
+            const option = document.createElement('option');
+            option.value = optionText;
+            option.textContent = optionText;
+            select.appendChild(option);
+        });
+        card.appendChild(select);
+    }
+  
+
+    const buttonGroup = document.createElement("div");
+    buttonGroup.className = "button-group";
+
+    const recBtn = document.createElement("button");
+    recBtn.className = "record-btn";
+    const dot = document.createElement("div");
+    dot.className = "record-dot";
+    const text = document.createElement("span");
+    text.textContent = "RECORD";
+
+    recBtn.appendChild(dot);
+    recBtn.appendChild(text);
+
+    window.questionRecorder = null; 
+    let recording = false;
+
+    recBtn.onclick = () => {
+        if (!stream || stream.getAudioTracks().length === 0) {
+            alert("Audio track not available for recording answer!");
+            return;
+        }
+
+        recording = !recording;
+
+        if (recording) {
+            recBtn.classList.add("recording");
+            text.textContent = "STOP RECORDING";
+            
+            window.questionRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            let chunks = [];
+            
+            window.questionRecorder.ondataavailable = e => chunks.push(e.data);
+            
+       window.questionRecorder.onstop = () => {
+        
+                const blob = new Blob(chunks, { type: "audio/webm" });
+                text.textContent = "RECORD";
+
+                // 1. تجهيز الملف عشان نبعته للسيرفر
+                const formData = new FormData();
+                formData.append('file', blob, `answer_${currentIndex + 1}.webm`);
+
+                // 2. نبعت الصوت للسيرفر (Upload)
+                fetch('http://127.0.0.1:8000/upload-video', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(uploadData => {
+                        console.log("Upload Success:", uploadData);
+
+                        // 3. بعد ما الرفع ينجح، نطلب نتيجة التحليل (Analysis)
+                        return fetch('http://127.0.0.1:8000/get-video-analysis');
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Analysis Result:", data);
+
+                        // عرض النص المستخرج والشعور في الصفحة
+                        const transDiv = document.getElementById('transcriptionText');
+                        if (transDiv) transDiv.innerText = "You said: " + data.text;
+
+                        const emoDiv = document.getElementById('emotionText');
+                        if (emoDiv && data.emotion) {
+                            emoDiv.innerText = "Detected Emotion: " + data.emotion;
+                            emoDiv.style.color = (data.emotion === "Fearful" || data.emotion === "Disgust") ? "#ff4d4d" : "#00ffcc";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error:", err);
+                        alert("An error occurred while analyzing the audio. Please ensure the server is running.");
+                    });
+            };
+            
+            window.questionRecorder.start();
+            
+        } else {
+            recBtn.classList.remove("recording");
+            if(window.questionRecorder) window.questionRecorder.stop();
+        }
+    };
+
+    const next = document.createElement("button");
+    next.className = "next-btn";
+    next.innerText = "NEXT";
+    
+    next.onclick = () => {
+        if (window.questionRecorder && window.questionRecorder.state === 'recording') {
+            window.questionRecorder.stop();
+            recording = false;
+        }
+
+        if(currentIndex < questions.length - 1) {
+            currentIndex++;
+            updateStep();
+            loadQuestion();
+        } else {
+            container.innerHTML = `<h2>✔ All questions completed!</h2>`;
+            questionStep.style.display = 'none';
+        }
+    };
+
+    buttonGroup.appendChild(recBtn);
+    buttonGroup.appendChild(next);
+    card.appendChild(buttonGroup);
+    container.appendChild(card);
+}
+
+ loadQuestion();
+updateStep();
+
+ window.addEventListener('load', () => {
+    document.getElementById('videoSection').classList.add('show');
+    document.getElementById('controls').classList.add('show');
+});
+</script>
+</body>
+</html>
