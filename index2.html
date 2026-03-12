@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="./Pictures/5.png" sizes="32x32" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
+  <title>Virtual Viva Simulation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+
+      color: white;
+
+
+      overflow-x: hidden;
+      background: linear-gradient(rgba(238, 248, 250, 0.4)),
+        url("./Pictures/2.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    .highlight {
+      color: #7A4F2C;
+      /* غيره للون اللي تحبه */
+    }
+
+
+    #title {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      bottom: 40px;
+      margin-top: 5rem;
+      padding-bottom: 3rem;
+      font-size: 40px;
+      font-weight: bold;
+      color: #1F6F78;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 2000;
+      line-height: 3;
+
+    }
+
+    .start-btn {
+      position: fixed;
+      top: 30px;
+      right: 25px;
+      padding: 10px 25px;
+      background: rgb(52, 108, 153);
+      color: #ffffff;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      z-index: 1000;
+    }
+
+    .start-btn:hover {
+      background-color: #020d2c;
+      color: white;
+      border: none;
+    }
+
+    .small-logo {
+      position: fixed;
+      top: 2px;
+      left: 20px;
+      width: 200x;
+      height: 100px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: transform 0.3s;
+      z-index: 1000;
+      background-color: #f8fcfd;
+
+    }
+
+    .small-logo:hover {
+      transform: scale(1.1);
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      min-height: 100vh;
+      position: relative;
+
+      margin-top: 0;
+      padding: 120px 20px 20px 20px;
+    }
+
+
+    .logo {
+      width: 350px;
+      height: 400px;
+      background-image: url("output-onlinegiftools (4).gif");
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      transition: transform 0.8s ease;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #1a3cff, 0 0 30px #001133;
+      animation: glow 2s infinite alternate;
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .logo.moved {
+      transform: translateX(300px);
+    }
+
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 20px #1a3cff, 0 0 30px #001133;
+      }
+
+      50% {
+        box-shadow: 0 0 35px #3f7fff, 0 0 50px #001144;
+      }
+
+      100% {
+        box-shadow: 0 0 20px #1a3cff, 0 0 30px #001133;
+      }
+    }
+
+    .info-box {
+      position: absolute;
+      left: 200px;
+      top: 60%;
+      transform: translateY(-50%);
+      width: 600px;
+      color: #244B63;
+      font-weight: 550;
+      opacity: 0;
+      transition: opacity 0.5s, font-size 0.3s;
+      font-size: 18px;
+      padding: 10px;
+background-color: none;
+     /* backdrop-filter: blur(12px);*/
+      /*-webkit-backdrop-filter: blur(12px);*/
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+ 
+
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+    }
+
+
+    .info-box.show {
+      opacity: 1;
+      font-size: 15px;
+    }
+
+    .info-box .about-start-btn {
+      margin-top: 10px;
+      padding: 8px 20px;
+      background: rgb(52, 108, 153);
+      color: #ffffff;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .info-box .about-start-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .popup-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-box {
+      width: 90%;
+      max-width: 400px;
+      background: #ffffff;
+      color: #001133;
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+      animation: pop 0.5s ease;
+      text-align: center;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.6) translateY(-20px);
+        opacity: 0;
+      }
+
+      60% {
+        transform: scale(1.05) translateY(5px);
+        opacity: 1;
+      }
+
+      80% {
+        transform: scale(0.98) translateY(-2px);
+      }
+
+      100% {
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .popup-box input[type="text"],
+    .popup-box input[type="file"] {
+      padding: 12px;
+      width: 95%;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+
+    .popup-box .popup-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 5px;
+      font-weight: 600;
+    }
+
+    .popup-box .cancel-btn {
+      background: #001133;
+      color: white;
+    }
+
+    .popup-box .ok-btn {
+      background: #1a3cff;
+      color: white;
+    }
+
+    .popup-box .popup-btn:hover {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 1024px) {
+      #title {
+        font-size: 30px;
+      }
+
+      .logo {
+        width: 300px;
+        height: 350px;
+      }
+
+      .logo.moved {
+        transform: translateX(250px);
+      }
+
+      .info-box {
+        left: 150px;
+        width: 350px;
+        font-size: 16px;
+      }
+
+      .info-box.show {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .center {
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 100px;
+        min-height: 100vh;
+      }
+
+      #title {
+        font-size: 24px;
+        padding: 0 15px;
+        top: 0;
+
+        align-items: center;
+      }
+
+      .start-btn {
+        padding: 8px 15px;
+        font-size: 14px;
+        right: 15px;
+      }
+
+      .small-logo {
+        width: 90px;
+        height: 45px;
+        left: 15px;
+      }
+
+      .logo {
+        width: 280px;
+        height: 320px;
+        margin-top: 8rem;
+      }
+
+      .info-box {
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        margin-top: 30px;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .logo.moved {
+        transform: none;
+        margin-bottom: 0;
+      }
+
+      .info-box.show {
+        opacity: 1;
+        font-size: 14px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .logo.moved+.info-box.show {
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 id="title">Virtual Viva </h1>
+
+  <img src="./Pictures/logo2.png" class="small-logo" alt="menu" />
+  <button class="start-btn" id="startBtn">Start</button>
+  <div class="center">
+    <div class="logo" id="logo"></div>
+
+    <div class="info-box" id="info">
+     
+      <p>
+        This platform uses AI to simulate viva exams and evaluate responses.
+      </p>
+      <p>
+        About: Our system allows students to practice viva exams anytime and
+        receive instant feedback. You can upload projects, simulate questions,
+        and improve your performance efficiently.
+      </p>
+      <p>
+        The system also allows instructors to create custom question sets,
+        evaluate student performance, and provide personalized guidance.
+        Whether preparing for university vivas, job interviews, or
+        professional assessments, our platform ensures a comprehensive,
+        interactive, and effective learning experience.
+      </p>
+      <p>
+        With a user-friendly interface, interactive simulations, and
+        insightful analytics, Virtual Viva Simulation empowers learners to
+        build confidence, enhance their communication skills, and succeed in
+        any oral examination scenario.
+      </p>  
+      <button class="about-start-btn" id="aboutStartBtn">Start</button>
+    </div>
+  </div>
+  <div class="popup-bg" id="popup">
+    <div class="popup-box">
+      <h2>Upload Your Project</h2>
+      <input type="text" placeholder="Project Name" />
+      <input type="file" />
+      <div>
+        <button class="popup-btn cancel-btn" id="cancelBtn">Cancel</button>
+        <button class="popup-btn ok-btn" id="okBtn">OK</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const logo = document.getElementById("logo");
+    const info = document.getElementById("info");
+    const smallLogo = document.querySelector(".small-logo");
+    const startBtn = document.getElementById("startBtn");
+    const aboutStartBtn = document.getElementById("aboutStartBtn");
+    const popup = document.getElementById("popup");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const okBtn = document.getElementById("okBtn");
+    const title = document.getElementById("title");
+    const text = "Virtual Viva Simulation";
+    let index = 0;
+
+    /*function typeEffect() {
+      if (index < text.length) {
+        title.innerHTML += text[index];
+        index++;
+        setTimeout(typeEffect, 50);
+      }
+    }
+
+    window.onload = () => {
+      title.innerHTML = "";
+      index = 0;
+      typeEffect();
+    };
+
+*/
+
+    const highlightWord = "Simulation";
+
+
+    function typeEffect() {
+      if (index < text.length) {
+        title.innerHTML += text[index];
+        index++;
+
+        // لما يخلص كتابة النص كله
+        if (index === text.length) {
+          title.innerHTML = text.replace(
+            highlightWord,
+            `<span class="highlight">${highlightWord}</span>`
+          );
+        }
+
+        setTimeout(typeEffect, 50);
+      }
+    }
+
+    window.onload = () => {
+      title.innerHTML = "";
+      index = 0;
+      typeEffect();
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function toggleInfo() {
+      logo.classList.toggle("moved");
+      info.classList.toggle("show");
+    }
+
+    /*logo.addEventListener("click", toggleInfo);*/
+    /*smallLogo.addEventListener("click", toggleInfo);*/
+    startBtn.addEventListener("click", () => (popup.style.display = "flex"));
+    aboutStartBtn.addEventListener(
+      "click",
+      () => (popup.style.display = "flex")
+    );
+    cancelBtn.addEventListener("click", () => (popup.style.display = "none"));
+/*okBtn.onclick = () => {
+  const projectName = popup.querySelector('input[type="text"]').value;
+  const fileInput = popup.querySelector('input[type="file"]');
+  const file = fileInput.files[0];
+
+  if (projectName && file) {
+    const fileURL = URL.createObjectURL(file);
+    localStorage.setItem("projectName", projectName);
+    localStorage.setItem("fileName", file.name);
+    localStorage.setItem("fileURL", fileURL);
+    window.location.href = "video.html";
+  } else {
+    alert("Please enter project name and select a file!");
+  }
+};*/
+ 
+okBtn.onclick = () => {
+
+const projectName = popup.querySelector('input[type="text"]').value;
+const fileInput = popup.querySelector('input[type="file"]');
+const file = fileInput.files[0];
+
+if (projectName && file) {
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+localStorage.setItem("projectName", projectName);
+localStorage.setItem("fileName", file.name);
+localStorage.setItem("fileData", e.target.result);
+
+window.location.href = "video.html";
+
+};
+
+reader.readAsDataURL(file);
+
+} else {
+
+alert("Please enter project name and select a file!");
+
+}
+
+};
+ 
+window.addEventListener("scroll", () => {
+  const scrollY = window.scrollY;
+
+  if (scrollY > 100) {
+    logo.classList.add("moved");
+    info.classList.add("show");
+  } else {
+    logo.classList.remove("moved");
+    info.classList.remove("show");
+  }
+});
+
+
+
+
+ 
+  </script>
+</body>
+
+</html>
