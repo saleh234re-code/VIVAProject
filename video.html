@@ -250,6 +250,7 @@ cursor:pointer;
 </button>
   
 </div>
+<div id="blReport" style="display:none;position:fixed;bottom:100px;left:20px;background:#081b34;padding:15px;border-radius:12px;font-size:13px;max-width:280px;z-index:999;"></div>
 <div id="resultDisplay" style="text-align:center;margin-top:20px;">
 <p id="transcriptionText" style="color:#ccc;font-style:italic;"></p>
 <h3 id="emotionText"></h3>
@@ -383,6 +384,11 @@ getAnalysis();
 
 mediaRecorder.start();
 
+    // ── Start Body Language Analysis ──
+    fetch("http://127.0.0.1:8000/body-language/start", { method: "POST" })
+      .then(() => { showBLStatus("🟢 Body Language Analysis Active"); })
+      .catch(e => console.warn("Body language API not available:", e));
+
 }else{
 
 mediaRecorder.stop();
@@ -395,7 +401,7 @@ recordBtn.classList.toggle("off");
 
 /* END */
 
-endBtn.onclick = () => {
+endBtn.onclick = async () => {
 
 if(recording && mediaRecorder){
 mediaRecorder.stop();
@@ -405,7 +411,16 @@ if(stream){
 stream.getTracks().forEach(track=>track.stop());
 }
 
-document.getElementById("popup").style.display="flex";
+// ── Stop Body Language 0026 fetch report ──
+  try {
+    const resp = await fetch("http://127.0.0.1:8000/body-language/report");
+    if(resp.ok){
+      const json = await resp.json();
+      if(json.status === "ready") displayBLReport(json.data);
+    }
+  } catch(e){ console.warn("BL report error:", e); }
+
+  document.getElementById("popup").style.display="flex";
 
 }
 
@@ -480,6 +495,32 @@ document.getElementById("emotionText").innerText =
 "Detected Emotion: " + data.emotion;
 
 }
+// ── Body Language Helper Functions ──────────────────────────
+function showBLStatus(msg){
+  let el = document.getElementById("blStatus");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "blStatus";
+    el.style.cssText = "position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#081b34;padding:5px 15px;border-radius:8px;font-size:13px;z-index:999;";
+    document.body.appendChild(el);
+  }
+  el.innerText = msg;
+}
+
+function displayBLReport(data){
+  const box = document.getElementById("blReport");
+  if(!box) return;
+  box.innerHTML = `
+    <h3 style="margin:0 0 10px">${data.grade_emoji} Body Language: ${data.grade}</h3>
+    <p>👁 Eye Contact: <b>${data.eye_contact}%</b></p>
+    <p>🤚 Hand Gestures: <b>${data.hand_gestures}%</b></p>
+    <p>🧍 Posture: <b>${data.posture}%</b></p>
+    <p>⭐ Total Score: <b>${data.total_score}%</b></p>
+    <ul>${data.tips.map(t=>`<li>${t}</li>`).join("")}</ul>
+  `;
+  box.style.display = "block";
+}
+
 function closePopup(){
 
 document.getElementById("popup").style.display="none";
