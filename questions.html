@@ -91,7 +91,99 @@ box-shadow:0 10px 20px rgba(0,0,0,0.15);
 }
 
 
-       
+        /* Body Language Report Card */
+        .bl-card {
+            background: linear-gradient(135deg, #081b34, #0f2d5a);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+
+        .bl-card h3 {
+            margin: 0 0 20px;
+            font-size: 20px;
+            color: #38bdf8;
+        }
+
+        .bl-metrics {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .bl-metric {
+            flex: 1;
+            min-width: 130px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .bl-metric .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .bl-metric .label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .bl-grade {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .bl-tips {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .bl-tips p {
+            margin: 0 0 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .bl-tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .bl-tips li {
+            font-size: 13px;
+            color: #cbd5e1;
+            margin-bottom: 5px;
+        }
+
+        .final-score-box {
+            background: linear-gradient(135deg, #2c7be5, #1a5fd0);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .final-score-box h2 {
+            font-size: 42px;
+            margin: 0;
+        }
+
+        .final-score-box p {
+            margin: 5px 0 0;
+            opacity: 0.85;
+            font-size: 14px;
+        }
     </style>
 
 </head>
@@ -229,38 +321,100 @@ showResults(result.evaluation);
 
         }
 
-        function showResults(evaluation) {
+        // ── Fetch Body Language Report from API ───────────────────────
+        async function fetchBLReport() {
+            try {
+                const resp = await fetch(`${API_BASE_URL}/body-language/report`);
+                if (!resp.ok) return null;
+                const json = await resp.json();
+                return json.status === "ready" ? json.data : null;
+            } catch(e) {
+                console.warn("Body language report not available:", e);
+                return null;
+            }
+        }
+
+        // ── Build Body Language Card HTML ─────────────────────────────
+        function buildBLCard(bl) {
+            return `
+            <div class="bl-card">
+                <h3>🧠 Body Language Analysis</h3>
+                <div class="bl-grade">${bl.grade_emoji} ${bl.grade}</div>
+                <div class="bl-metrics">
+                    <div class="bl-metric">
+                        <div class="value">${bl.eye_contact}%</div>
+                        <div class="label">👁 Eye Contact</div>
+                    </div>
+                    <div class="bl-metric">
+                        <div class="value">${bl.hand_gestures}%</div>
+                        <div class="label">🤚 Hand Gestures</div>
+                    </div>
+                    <div class="bl-metric">
+                        <div class="value">${bl.posture}%</div>
+                        <div class="label">🧍 Posture</div>
+                    </div>
+                    <div class="bl-metric">
+                        <div class="value">${bl.total_score}%</div>
+                        <div class="label">⭐ Total</div>
+                    </div>
+                </div>
+                <div class="bl-tips">
+                    <p>💡 Recommendations:</p>
+                    <ul>${bl.tips.map(t => `<li>${t}</li>`).join("")}</ul>
+                </div>
+            </div>`;
+        }
+
+        // ── Show All Results ──────────────────────────────────────────
+        async function showResults(evaluation) {
+
+            container.innerHTML = "<h2 style='text-align:center'>Loading results...</h2>";
+
+            // Calculate answer score
+            let total = 0;
+            evaluation.forEach(e => total += e.score);
+            let answerPercent = Math.round((total / (evaluation.length * 10)) * 100);
+
+            // Fetch body language report
+            const bl = await fetchBLReport();
+
+            // Calculate overall score
+            // Answers: 70% weight | Body Language: 30% weight
+            let overallPercent = bl
+                ? Math.round((answerPercent * 0.70) + (bl.total_score * 0.30))
+                : answerPercent;
 
             container.innerHTML = "";
 
-            let total = 0;
+            // ── Overall Score Box ──────────────────────────────────────
+            container.innerHTML += `
+            <div class="final-score-box">
+                <h2>${overallPercent}%</h2>
+                <p>Overall Performance Score</p>
+            </div>`;
 
-            evaluation.forEach(e => total += e.score);
+            // ── Body Language Card ─────────────────────────────────────
+            if (bl) {
+                container.innerHTML += buildBLCard(bl);
+            }
 
-            let percent = Math.round((total / (evaluation.length * 10)) * 100);
+            // ── Answer Score Header ────────────────────────────────────
+            container.innerHTML += `
+            <div class="question-card" style="margin-bottom:20px;">
+                <h3 style="margin:0;color:#2c7be5">
+                    📝 Answer Score: ${answerPercent}%
+                </h3>
+            </div>`;
 
-            let html = `<h2>Final Score ${percent}%</h2>`;
-
+            // ── Individual Question Results ────────────────────────────
             evaluation.forEach((e, i) => {
-
-                html += `
-
-<div class="question-card">
-
-<p><b>Question ${i + 1}</b></p>
-
-<p>Score: ${e.score}/10</p>
-
-<p>${e.feedback}</p>
-
-</div>
-
-`;
-
+                container.innerHTML += `
+                <div class="question-card">
+                    <p><b>Question ${i + 1}</b></p>
+                    <p>Score: ${e.score}/10</p>
+                    <p>${e.feedback}</p>
+                </div>`;
             });
-
-            container.innerHTML = html;
-
         }
 
         loadQuestion();
