@@ -3,46 +3,34 @@ from pydub import AudioSegment
 import speech_recognition as sr
 import os
 
+
 import torch
 import torch.nn as nn
 import joblib
 import librosa
 import numpy as np
-
-from database import SessionLocal, SpeechAnalysis  # ربط الداتا بيز
-
 # =========================
 # Internal Memory Storage
 # =========================
 _latest_video_result = None
 _latest_project_result = None
 
+
+
 MAX_PAD_LEN = 174
 SR = 22050
 NUM_CLASSES = 6
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+
+
 class DeeperCNN(nn.Module):
     def __init__(self, num_classes):
         super(DeeperCNN, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        )
+        self.conv1 = nn.Sequential(nn.Conv2d(1, 32, kernel_size=(3, 3), padding=1), nn.BatchNorm2d(32), nn.ReLU(), nn.MaxPool2d(kernel_size=(2, 2), stride=2))
+        self.conv2 = nn.Sequential(nn.Conv2d(32, 64, kernel_size=(3, 3), padding=1), nn.BatchNorm2d(64), nn.ReLU(), nn.MaxPool2d(kernel_size=(2, 2), stride=2))
+        self.conv3 = nn.Sequential(nn.Conv2d(64, 128, kernel_size=(3, 3), padding=1), nn.BatchNorm2d(128), nn.ReLU(), nn.MaxPool2d(kernel_size=(2, 2), stride=2))
         self.dropout = nn.Dropout(p=0.3)
         self.fc1 = nn.Linear(128 * 16 * 21, 512)
         self.fc2 = nn.Linear(512, num_classes)
@@ -59,6 +47,7 @@ class DeeperCNN(nn.Module):
 
 model = DeeperCNN(NUM_CLASSES).to(DEVICE)
 
+
 try:
     model.load_state_dict(torch.load('ser_cnn_model.pth', map_location=DEVICE))
 except:
@@ -66,6 +55,7 @@ except:
 
 model.eval()
 le = joblib.load('label_encoder.pkl')
+
 
 def predict_emotion(audio_file_path):
     try:
@@ -100,8 +90,10 @@ def save_video_result(result):
     global _latest_video_result
     _latest_video_result = result
 
+
 def get_video_result():
     return _latest_video_result
+
 
 # =========================
 # Save / Get Project Result
@@ -110,11 +102,13 @@ def save_project_result(result):
     global _latest_project_result
     _latest_project_result = result
 
+
 def get_project_result():
     return _latest_project_result
 
+
 # =========================
-# Video → Audio + Speech Recognition + Save to DB
+# Video → Audio + Speech Recognition
 # =========================
 def process_video(video_path):
     global _latest_video_result
@@ -135,27 +129,20 @@ def process_video(video_path):
         # 3️⃣ Speech Recognition
         recognizer = sr.Recognizer()
         full_text = ""
+
         with sr.AudioFile(audio_path) as source:
             audio_data = recognizer.record(source)
         text = recognizer.recognize_google(audio_data)
-
-        # 4️⃣ Emotion Prediction
         emotion_result = predict_emotion(audio_path)
-
-        # 5️⃣ Save to Database
-        db = SessionLocal()
-        speech_entry = SpeechAnalysis(SpeechText=text)
-        db.add(speech_entry)
-        db.commit()
-        db.close()
-
         _latest_video_result = {
             "text": text,
             "emotion": emotion_result,
             "audio_path": audio_path
         }
         return _latest_video_result
-
     except Exception as e:
         print(f"General Error: {e}")
         return None
+
+def get_video_result():
+    return _latest_video_result
