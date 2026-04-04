@@ -205,6 +205,22 @@ def run_bl_thread():
         "face_visibility": round(face_vis, 1),
     }
 
+    # Save results to database
+    try:
+        from database import SessionLocal, BodyLanguageScore
+        db = SessionLocal()
+        bl_record = BodyLanguageScore(
+            ImagePath="webcam_session",
+            Score=round(final_score, 2),
+            AnalysisText=f"Eye: {avg_eye:.1f}% | Hand: {avg_hand:.1f}% | Posture: {avg_posture:.1f}% | Grade: {grade}"
+        )
+        db.add(bl_record)
+        db.commit()
+        print(f"Body Language saved to DB with ID: {bl_record.id}")
+        db.close()
+    except Exception as e:
+        print(f"Database error: {e}")
+
 
 @app.post("/body-language/start")
 async def start_body_language():
